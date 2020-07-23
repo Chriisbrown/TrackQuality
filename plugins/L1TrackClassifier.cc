@@ -192,6 +192,15 @@ void L1TrackClassifier::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
       TransformedFeatures = FeatureTransform::Transform(aTrack,in_features); //Transform feautres
       cms::Ort::ONNXRuntime Runtime(ONNX_path); //Setup ONNX runtime
 
+      
+      for (auto s : Runtime.input_node_strings_){
+        cout << s << endl;
+      }
+
+      for (auto o : Runtime.output_node_strings_){
+        cout << o << endl;
+      }
+
       //ONNX runtime recieves a vector of vectors of floats so push back the input
       // vector of float to create a 1,1,21 ortinput
       ortinput.push_back(TransformedFeatures);
