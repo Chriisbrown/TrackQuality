@@ -637,7 +637,7 @@ void L1TrackClassNtupleMaker::analyze(const edm::Event& iEvent, const edm::Event
     m_trk_unknown->clear();
     m_trk_combinatoric->clear();
     m_trk_fake->clear();
-    if (TrackQuality) m_trk_MVA1->clear();
+    m_trk_MVA1->clear();
     m_trk_matchtp_pdgid->clear();
     m_trk_matchtp_pt->clear();
     m_trk_matchtp_eta->clear();
@@ -977,9 +977,10 @@ void L1TrackClassNtupleMaker::analyze(const edm::Event& iEvent, const edm::Event
       float tmp_trk_chi2rphi = iterL1Track->chi2XY();
       float tmp_trk_chi2rz = iterL1Track->chi2Z();
       float tmp_trk_bendchi2 = iterL1Track->stubPtConsistency();
-
+      
+      float tmp_trk_MVA1 = -999;
       if (TrackQuality){
-        float tmp_trk_MVA1 = iterL1Track->trkMVA1();
+        tmp_trk_MVA1 = iterL1Track->trkMVA1();
       }
 
       std::vector< edm::Ref< edmNew::DetSetVector< TTStub< Ref_Phase2TrackerDigi_ > >, TTStub< Ref_Phase2TrackerDigi_ > > > stubRefs = iterL1Track->getStubRefs();

@@ -14,7 +14,7 @@
 #include <set>
 #include <vector>
 #include <memory>
-#include <string>
+
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -34,7 +34,7 @@
 using namespace cms::Ort;
 
 
-class L1TrackClassifier : public edm::stream::EDProducer<GlobalCache<ONNXRuntime>> {
+class L1TrackClassifier : public edm::stream::EDProducer<edm::GlobalCache<ONNXRuntime>> {
 public:
   explicit L1TrackClassifier(const edm::ParameterSet&, const ONNXRuntime *);
   ~L1TrackClassifier() override;
@@ -73,7 +73,7 @@ L1TrackClassifier::L1TrackClassifier(const edm::ParameterSet& Params, , const ON
 trackToken(consumes< std::vector<TTTrack< Ref_Phase2TrackerDigi_> > > (Params.getParameter<edm::InputTag>("L1TrackInputTag"))){
   
 
-  algorithm = (string)Params.getParameter<string>("Algorithm");
+  algorithm = (std::string)Params.getParameter<std::string>("Algorithm");
 
   if (Algorithm == "Cut"){
         Set_Cut_Parameters(Algorithm,
@@ -87,8 +87,8 @@ trackToken(consumes< std::vector<TTTrack< Ref_Phase2TrackerDigi_> > > (Params.ge
   else {
         Set_ONNX_Model(Algorithm,
                        Params.getParameter<edm::FileInPath>("ONNXmodel").fullPath()
-                       Params.getParameter<string>("ONNXInputName"),
-                       Params.getParameter<vector<string>>("in_features")); 
+                       Params.getParameter<std::string>("ONNXInputName"),
+                       Params.getParameter<vector<std::string>>("in_features")); 
     }
 
 
@@ -152,8 +152,8 @@ void L1TrackClassifier::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
     else {
       // Setup ONNX input and output names and arrays
-      std::vector<string> ortinput_names;
-      std::vector<string> ortoutput_names;
+      std::vector<std::string> ortinput_names;
+      std::vector<std::string> ortoutput_names;
       cms::Ort::FloatArrays ortinput;
       cms::Ort::FloatArrays ortoutputs;
 
@@ -339,7 +339,7 @@ vector<float> L1TrackClassifier::FeatureTransform(TTTrack < Ref_Phase2TrackerDig
 
 }
 
-void L1TrackClassifier::Set_Cut_Parameters(string Algorithm,float maxZ0, float maxEta, float chi2dofMax,float bendchi2Max, float minPt, int nStubmin) {
+void L1TrackClassifier::Set_Cut_Parameters(std::string Algorithm,float maxZ0, float maxEta, float chi2dofMax,float bendchi2Max, float minPt, int nStubmin) {
 
     Algorithm_ = Algorithm;
     maxZ0_ = maxZ0;
@@ -351,7 +351,7 @@ void L1TrackClassifier::Set_Cut_Parameters(string Algorithm,float maxZ0, float m
 
 }
 
-void L1TrackClassifier::Set_ONNX_Model(string Algorithm,string ONNXmodel,string ONNXInputName,vector<string> in_features) {
+void L1TrackClassifier::Set_ONNX_Model(std::string Algorithm,std::string ONNXmodel,std::string ONNXInputName,vector<std::string> in_features) {
 
     Algorithm_ = Algorithm;
     ONNXmodel_ = ONNXmodel;
