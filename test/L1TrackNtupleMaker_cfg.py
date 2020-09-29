@@ -86,7 +86,7 @@ process.Timing = cms.Service("Timing", summaryOnly = cms.untracked.bool(True))
 ############################################################
 
 # Load Quality params to change algorithm and model location
-process.load("L1Trigger.TrackTrigger.TrackQualityParams_cfi")
+process.load("L1Trigger.TrackQuality.TrackQualityParams_cfi")
 process.TrackQualityParams.Quality_Algorithm = cms.string("GBDT")
 process.TrackQualityParams.ONNXmodel = cms.string("../../TrackTrigger/ML_data/FakeIDGBDT/GBDT_model.onnx")
 
@@ -112,7 +112,7 @@ elif (L1TRKALGO == 'HYBRID_DISPLACED'):
 
 elif (L1TRKALGO == 'HYBRID_QUALITY'):
     process.TTTracksEmulation = cms.Path(process.L1HybridTracks)
-    process.TTTracksEmulationWithTruth = cms.Path(process.L1HybridTracksWithAssociators*process.TrackClassifier)
+    process.TTTracksEmulationWithTruth = cms.Path(process.L1HybridTracksWithAssociators*process.L1TrackQuality)
     NHELIXPAR = 5
     L1TRK_NAME  = "TTTracksFromTrackletEmulationWithQuality"
     L1TRK_LABEL = "Level1TTTracks"
