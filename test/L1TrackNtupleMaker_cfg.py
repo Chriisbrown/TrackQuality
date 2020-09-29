@@ -87,8 +87,8 @@ process.Timing = cms.Service("Timing", summaryOnly = cms.untracked.bool(True))
 
 # Load Quality params to change algorithm and model location
 process.load("L1Trigger.TrackQuality.TrackQualityParams_cfi")
-process.TrackQualityParams.Quality_Algorithm = cms.string("GBDT")
-process.TrackQualityParams.ONNXmodel = cms.string("../../TrackTrigger/ML_data/FakeIDGBDT/GBDT_model.onnx")
+#process.TrackQualityParams.Quality_Algorithm = cms.string("GBDT")
+#process.TrackQualityParams.ONNXmodel = cms.FileInPath("../../TrackTrigger/ML_data/FakeIDGBDT/GBDT_model.onnx")
 
 process.load("L1Trigger.TrackFindingTracklet.L1HybridEmulationTracks_cff")
 
@@ -114,9 +114,9 @@ elif (L1TRKALGO == 'HYBRID_QUALITY'):
     process.TTTracksEmulation = cms.Path(process.L1HybridTracks)
     process.TTTracksEmulationWithTruth = cms.Path(process.L1HybridTracksWithAssociators*process.L1TrackQuality)
     NHELIXPAR = 5
-    L1TRK_NAME  = "TTTracksFromTrackletEmulationWithQuality"
+    L1TRK_NAME  = "TTTracksFromTrackletEmulation"
     L1TRK_LABEL = "Level1TTTracks"
-    L1TRUTH_NAME = "TTTrackAssociatorFromPixelDigisExtended"
+    L1TRUTH_NAME = "TTTrackAssociatorFromPixelDigis"
     
 # LEGACY ALGORITHM (EXPERTS ONLY): TRACKLET  
 elif (L1TRKALGO == 'TRACKLET'):
@@ -176,6 +176,7 @@ process.L1TrackNtuple = cms.EDAnalyzer('L1TrackNtupleMaker',
                                        TP_maxZ0 = cms.double(30.0),      # only save TPs with |z0| < X cm
                                        L1TrackInputTag = cms.InputTag(L1TRK_NAME, L1TRK_LABEL),         # TTTrack input
                                        MCTruthTrackInputTag = cms.InputTag(L1TRUTH_NAME, L1TRK_LABEL),  # MCTruth input 
+                                       MVATrackInputTag =  cms.InputTag("TrackQualityParams", L1TRK_LABEL),
                                        # other input collections
                                        L1StubInputTag = cms.InputTag("TTStubsFromPhase2TrackerDigis","StubAccepted"),
                                        MCTruthClusterInputTag = cms.InputTag("TTClusterAssociatorFromPixelDigis", "ClusterAccepted"),

@@ -49,14 +49,13 @@ private:
 
   std::vector<float> FeatureTransform(TTTrack < Ref_Phase2TrackerDigi_ > aTrack, std::vector<std::string> in_features);
   void Set_Cut_Parameters(std::string Algorithm,float maxZ0, float maxEta, float chi2dofMax,float bendchi2Max, float minPt, int nStubmin);
-  void Set_ONNX_Model(std::string Algorithm,std::string ONNXmodel,std::string ONNXInputName,std::vector<std::string> in_features);
+  void Set_ONNX_Model(std::string Algorithm,std::string ONNXInputName,std::vector<std::string> in_features);
 
   void produce(edm::Event&, const edm::EventSetup&) override;
 
 
   // Private Memember Data
   std::string Algorithm_ = "None";
-  std::string ONNXmodel_;
   std::string ONNXInputName_;
   std::vector<std::string> in_features_;
   float maxZ0_ = 15;
@@ -89,7 +88,6 @@ trackToken(consumes< std::vector<TTTrack< Ref_Phase2TrackerDigi_> > > (Params.ge
     }
   else {
         L1TrackClassifier::Set_ONNX_Model(Algorithm,
-                       Params.getParameter<edm::FileInPath>("ONNXmodel").fullPath(),
                        Params.getParameter<std::string>("ONNXInputName"),
                        Params.getParameter<std::vector<std::string>>("in_features")); 
     }
@@ -161,10 +159,9 @@ void L1TrackClassifier::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
       cms::Ort::FloatArrays ortoutputs;
 
       std::vector<float> Transformed_features = L1TrackClassifier::FeatureTransform(aTrack,this->in_features_);
-      cms::Ort::ONNXRuntime Runtime(this->ONNXmodel_); //Setup ONNX runtime
 
-	    ortinput_names.push_back(this->ONNXInputName_);
-	    ortoutput_names = Runtime.getOutputNames();
+	    ortinput_names.push_back(ONNXInputName_);
+	    ortoutput_names = globalCache()->getOutputNames();
 
       //ONNX runtime recieves a vector of vectors of floats so push back the input
       // vector of float to create a 1,1,21 ortinput
@@ -354,10 +351,9 @@ void L1TrackClassifier::Set_Cut_Parameters(std::string Algorithm,float maxZ0, fl
 
 }
 
-void L1TrackClassifier::Set_ONNX_Model(std::string Algorithm,std::string ONNXmodel,std::string ONNXInputName,std::vector<std::string> in_features) {
+void L1TrackClassifier::Set_ONNX_Model(std::string Algorithm,std::string ONNXInputName,std::vector<std::string> in_features) {
 
     Algorithm_ = Algorithm;
-    ONNXmodel_ = ONNXmodel;
     ONNXInputName_ = ONNXInputName;
     in_features_ = in_features;
 

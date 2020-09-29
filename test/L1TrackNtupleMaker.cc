@@ -953,6 +953,15 @@ void L1TrackClassNtupleMaker::analyze(const edm::Event& iEvent, const edm::Event
       cout << endl << "Looking at " << L1Tk_nPar << "-parameter tracks!" << endl;
     }
 
+
+    if (TrackQuality){
+      std::vector< TTTrack< Ref_Phase2TrackerDigi_ > >::const_iterator iterMVATrack;
+      for ( iterMVATrack = TTTrackMVAHandle->begin(); iterMVATrack != TTTrackMVAHandle->end(); iterMVATrack++ ) {
+        float tmp_trk_MVA1 = iterMVATrack->trkMVA1(); 
+        m_trk_MVA1->push_back(tmp_trk_MVA1);
+     }
+    }
+
     int this_l1track = 0;
     std::vector< TTTrack< Ref_Phase2TrackerDigi_ > >::const_iterator iterL1Track;
     for ( iterL1Track = TTTrackHandle->begin(); iterL1Track != TTTrackHandle->end(); iterL1Track++ ) {
@@ -978,11 +987,6 @@ void L1TrackClassNtupleMaker::analyze(const edm::Event& iEvent, const edm::Event
       float tmp_trk_chi2rz = iterL1Track->chi2Z();
       float tmp_trk_bendchi2 = iterL1Track->stubPtConsistency();
       
-      float tmp_trk_MVA1 = -999;
-      if (TrackQuality){
-        tmp_trk_MVA1 = iterL1Track->trkMVA1();
-      }
-
       std::vector< edm::Ref< edmNew::DetSetVector< TTStub< Ref_Phase2TrackerDigi_ > >, TTStub< Ref_Phase2TrackerDigi_ > > > stubRefs = iterL1Track->getStubRefs();
       int tmp_trk_nstub  = (int) stubRefs.size();
 
@@ -1089,7 +1093,6 @@ void L1TrackClassNtupleMaker::analyze(const edm::Event& iEvent, const edm::Event
       m_trk_loose->push_back(tmp_trk_loose);
       m_trk_unknown->push_back(tmp_trk_unknown);
       m_trk_combinatoric->push_back(tmp_trk_combinatoric);
-      if (TrackQuality) m_trk_MVA1->push_back(tmp_trk_MVA1);
      
 
 

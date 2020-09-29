@@ -4,7 +4,7 @@ TrackQualityParams = cms.EDProducer("L1TrackClassifier",
                                   L1TrackInputTag = cms.InputTag("TTTracksFromTrackletEmulation", "Level1TTTracks"), 
                                   Algorithm = cms.string("GBDT"), #None, Cut, NN, GBDT
 
-                                  ONNXmodel = cms.string("L1Trigger/TrackQuality/data/FakeIDGBDT/GBDT_model.onnx"),
+                                  ONNXmodel = cms.FileInPath("L1Trigger/TrackQuality/data/FakeIDGBDT/GBDT_model.onnx"),
                                   ONNXInputName = cms.string("input_1"),
 
 
