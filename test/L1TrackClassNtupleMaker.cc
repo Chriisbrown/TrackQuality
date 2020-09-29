@@ -119,6 +119,7 @@ private:
   int L1Tk_minNStub;    // require L1 tracks to have >= minNStub (this is mostly for tracklet purposes)
 
   bool TrackingInJets;  // do tracking in jets?
+  bool TrackQuality; // do track quality evaluation?
 
 
   edm::InputTag L1TrackInputTag;        // L1 track collection
@@ -175,8 +176,6 @@ private:
   std::vector<int>*   m_trk_combinatoric;
   std::vector<int>*   m_trk_fake; //0 fake, 1 track from primary interaction, 2 secondary track
   std::vector<float>* m_trk_MVA1; // Track Classifier Output
-  std::vector<float>* m_trk_MVA2; // No Output
-  std::vector<float>* m_trk_MVA3; // No Ouput
   std::vector<int>*   m_trk_matchtp_pdgid;
   std::vector<float>* m_trk_matchtp_pt;
   std::vector<float>* m_trk_matchtp_eta;
@@ -304,6 +303,7 @@ L1TrackClassNtupleMaker::L1TrackClassNtupleMaker(edm::ParameterSet const& iConfi
   L1Tk_minNStub        = iConfig.getParameter< int >("L1Tk_minNStub");
 
   TrackingInJets = iConfig.getParameter< bool >("TrackingInJets");
+  TrackQuality = iConfig.getParameter< bool >("TrackQuality");
 
   L1StubInputTag           = iConfig.getParameter<edm::InputTag>("L1StubInputTag");
   MCTruthClusterInputTag   = iConfig.getParameter<edm::InputTag>("MCTruthClusterInputTag");
@@ -375,8 +375,6 @@ void L1TrackClassNtupleMaker::beginJob()
   m_trk_combinatoric  = new std::vector<int>;
   m_trk_fake          = new std::vector<int>;
   m_trk_MVA1          = new std::vector<float>;
-  m_trk_MVA2          = new std::vector<float>;
-  m_trk_MVA3          = new std::vector<float>;
   m_trk_matchtp_pdgid = new std::vector<int>;
   m_trk_matchtp_pt    = new std::vector<float>;
   m_trk_matchtp_eta   = new std::vector<float>;
@@ -491,9 +489,9 @@ void L1TrackClassNtupleMaker::beginJob()
     eventTree->Branch("trk_unknown",      &m_trk_unknown);
     eventTree->Branch("trk_combinatoric", &m_trk_combinatoric);
     eventTree->Branch("trk_fake",         &m_trk_fake);
-    eventTree->Branch("trk_MVA1",         &m_trk_MVA1);
-    eventTree->Branch("trk_MVA2",         &m_trk_MVA2);
-    eventTree->Branch("trk_MVA3",         &m_trk_MVA3);
+    if (TrackQuality) {
+      eventTree->Branch("trk_MVA1",         &m_trk_MVA1);
+    }
     eventTree->Branch("trk_matchtp_pdgid",&m_trk_matchtp_pdgid);
     eventTree->Branch("trk_matchtp_pt",   &m_trk_matchtp_pt);
     eventTree->Branch("trk_matchtp_eta",  &m_trk_matchtp_eta);
@@ -640,8 +638,6 @@ void L1TrackClassNtupleMaker::analyze(const edm::Event& iEvent, const edm::Event
     m_trk_combinatoric->clear();
     m_trk_fake->clear();
     m_trk_MVA1->clear();
-    m_trk_MVA2->clear();
-    m_trk_MVA3->clear();
     m_trk_matchtp_pdgid->clear();
     m_trk_matchtp_pt->clear();
     m_trk_matchtp_eta->clear();
@@ -957,21 +953,6 @@ void L1TrackClassNtupleMaker::analyze(const edm::Event& iEvent, const edm::Event
       cout << endl << "Looking at " << L1Tk_nPar << "-parameter tracks!" << endl;
     }
 
-    // loop over L1 MAVA tracks
-
-     std::vector< TTTrack< Ref_Phase2TrackerDigi_ > >::const_iterator iterMVATrack;
-    for ( iterMVATrack = TTTrackMVAHandle->begin(); iterMVATrack != TTTrackMVAHandle->end(); iterMVATrack++ ) {
-      float tmp_trk_MVA1 = iterMVATrack->trkMVA1(); 
-      float tmp_trk_MVA2 = iterMVATrack->trkMVA2();
-      float tmp_trk_MVA3 = iterMVATrack->trkMVA3();
-
-      m_trk_MVA1->push_back(tmp_trk_MVA1);
-      m_trk_MVA2->push_back(tmp_trk_MVA2);
-      m_trk_MVA3->push_back(tmp_trk_MVA3);
-
-     }
-
-
     int this_l1track = 0;
     std::vector< TTTrack< Ref_Phase2TrackerDigi_ > >::const_iterator iterL1Track;
     for ( iterL1Track = TTTrackHandle->begin(); iterL1Track != TTTrackHandle->end(); iterL1Track++ ) {
@@ -996,6 +977,10 @@ void L1TrackClassNtupleMaker::analyze(const edm::Event& iEvent, const edm::Event
       float tmp_trk_chi2rphi = iterL1Track->chi2XY();
       float tmp_trk_chi2rz = iterL1Track->chi2Z();
       float tmp_trk_bendchi2 = iterL1Track->stubPtConsistency();
+
+      if (TrackQuality){
+        float tmp_trk_MVA1 = iterMVATrack->trkMVA1();
+      }
 
       std::vector< edm::Ref< edmNew::DetSetVector< TTStub< Ref_Phase2TrackerDigi_ > >, TTStub< Ref_Phase2TrackerDigi_ > > > stubRefs = iterL1Track->getStubRefs();
       int tmp_trk_nstub  = (int) stubRefs.size();
@@ -1103,6 +1088,8 @@ void L1TrackClassNtupleMaker::analyze(const edm::Event& iEvent, const edm::Event
       m_trk_loose->push_back(tmp_trk_loose);
       m_trk_unknown->push_back(tmp_trk_unknown);
       m_trk_combinatoric->push_back(tmp_trk_combinatoric);
+      if (TrackQuality) m_trk_MVA1->push_back(tmp_trk_MVA1);
+      else m_trk_MVA1->push_back(999.);
      
 
 

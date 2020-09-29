@@ -1,14 +1,13 @@
 import FWCore.ParameterSet.Config as cms
 
-TrackClassifier = cms.EDProducer("L1TrackClassifier",
+TrackQualityParams = cms.EDProducer("L1TrackClassifier",
                                   L1TrackInputTag = cms.InputTag("TTTracksFromTrackletEmulation", "Level1TTTracks"), 
-                                  Algorithm = cms.string("None"), #None, Cut, NN, GBDT
+                                  Algorithm = cms.string("GBDT"), #None, Cut, NN, GBDT
 
-                                  NNIdONNXmodel = cms.string("L1Trigger/TrackQuality/data/FakeIDNN/NN_model.onnx"),
-                                  NNIdONNXInputName = cms.string("input_1"),
+                                  ONNXmodel = cms.string("L1Trigger/TrackQuality/data/FakeIDGBDT/GBDT_model.onnx"),
+                                  ONNXInputName = cms.string("input_1"),
 
-                                  GBDTIdONNXmodel = cms.string("L1Trigger/TrackQuality/data/FakeIDGBDT/GBDT_model.onnx"),
-                                  GBDTIdONNXInputName = cms.string("feature_input"),
+
 
                                   in_features = cms.vstring(["log_chi2","log_bendchi2","log_chi2rphi","log_chi2rz",
                                                              "nstubs","lay1_hits","lay2_hits","lay3_hits","lay4_hits",
