@@ -1,5 +1,5 @@
 /*
- * L1TrackClassifier
+ * L1TrackQuality
  *
  * An ED producer taking L1 TTTracks without MVA fields filled
  * Returning L! TTTracks with MVA fields filled 
@@ -34,10 +34,10 @@
 using namespace cms::Ort;
 
 
-class L1TrackClassifier : public edm::stream::EDProducer<edm::GlobalCache<ONNXRuntime>> {
+class L1TrackQuality : public edm::stream::EDProducer<edm::GlobalCache<ONNXRuntime>> {
 public:
-  explicit L1TrackClassifier(const edm::ParameterSet&, const ONNXRuntime *);
-  ~L1TrackClassifier() override;
+  explicit L1TrackQuality(const edm::ParameterSet&, const ONNXRuntime *);
+  ~L1TrackQuality() override;
 
   static std::unique_ptr<ONNXRuntime> initializeGlobalCache(const edm::ParameterSet &);
   static void globalEndJob(const ONNXRuntime *);
@@ -71,14 +71,14 @@ private:
 ///////////////
 //constructor//
 ///////////////
-L1TrackClassifier::L1TrackClassifier(const edm::ParameterSet& Params, const ONNXRuntime *cache) :
+L1TrackQuality::L1TrackQuality(const edm::ParameterSet& Params, const ONNXRuntime *cache) :
 trackToken(consumes< std::vector<TTTrack< Ref_Phase2TrackerDigi_> > > (Params.getParameter<edm::InputTag>("L1TrackInputTag"))){
   
 
   std::string Algorithm = (std::string)Params.getParameter<std::string>("Algorithm");
 
   if (Algorithm == "Cut"){
-        L1TrackClassifier::Set_Cut_Parameters(Algorithm,
+        L1TrackQuality::Set_Cut_Parameters(Algorithm,
                            (float)Params.getParameter<double>("maxZ0"),
                            (float)Params.getParameter<double>("maxEta"),
                            (float)Params.getParameter<double>("chi2dofMax"),
@@ -87,7 +87,7 @@ trackToken(consumes< std::vector<TTTrack< Ref_Phase2TrackerDigi_> > > (Params.ge
                            Params.getParameter<int>("nStubsmin")); 
     }
   else {
-        L1TrackClassifier::Set_ONNX_Model(Algorithm,
+        L1TrackQuality::Set_ONNX_Model(Algorithm,
                        Params.getParameter<std::string>("ONNXInputName"),
                        Params.getParameter<std::vector<std::string>>("in_features")); 
     }
@@ -102,17 +102,17 @@ trackToken(consumes< std::vector<TTTrack< Ref_Phase2TrackerDigi_> > > (Params.ge
 //////////////
 //destructor//
 //////////////
-L1TrackClassifier::~L1TrackClassifier() {}
+L1TrackQuality::~L1TrackQuality() {}
 
-std::unique_ptr<ONNXRuntime> L1TrackClassifier::initializeGlobalCache(const edm::ParameterSet &iConfig) {
+std::unique_ptr<ONNXRuntime> L1TrackQuality::initializeGlobalCache(const edm::ParameterSet &iConfig) {
   return std::make_unique<ONNXRuntime>(iConfig.getParameter<edm::FileInPath>("ONNXmodel").fullPath());
 }
 
-void L1TrackClassifier::globalEndJob(const ONNXRuntime *cache) {}
+void L1TrackQuality::globalEndJob(const ONNXRuntime *cache) {}
 ////////////
 //producer//
 ////////////
-void L1TrackClassifier::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void L1TrackQuality::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
   //Get TTTracks
   edm::Handle<L1TTTrackCollectionType> L1TTTrackHandle;
@@ -158,7 +158,7 @@ void L1TrackClassifier::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
       cms::Ort::FloatArrays ortinput;
       cms::Ort::FloatArrays ortoutputs;
 
-      std::vector<float> Transformed_features = L1TrackClassifier::FeatureTransform(aTrack,this->in_features_);
+      std::vector<float> Transformed_features = L1TrackQuality::FeatureTransform(aTrack,this->in_features_);
 
 	    ortinput_names.push_back(ONNXInputName_);
 	    ortoutput_names = globalCache()->getOutputNames();
@@ -202,7 +202,7 @@ void L1TrackClassifier::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
   
 }
 
-std::vector<float> L1TrackClassifier::FeatureTransform(TTTrack < Ref_Phase2TrackerDigi_ > aTrack, std::vector<std::string> in_features){
+std::vector<float> L1TrackQuality::FeatureTransform(TTTrack < Ref_Phase2TrackerDigi_ > aTrack, std::vector<std::string> in_features){
   // List input features for MVA in proper order below, the features options are 
     // {"log_chi2","log_chi2rphi","log_chi2rz","log_bendchi2","nstubs","lay1_hits","lay2_hits",
     // "lay3_hits","lay4_hits","lay5_hits","lay6_hits","disk1_hits","disk2_hits","disk3_hits",
@@ -339,7 +339,7 @@ std::vector<float> L1TrackClassifier::FeatureTransform(TTTrack < Ref_Phase2Track
 
 }
 
-void L1TrackClassifier::Set_Cut_Parameters(std::string Algorithm,float maxZ0, float maxEta, float chi2dofMax,float bendchi2Max, float minPt, int nStubmin) {
+void L1TrackQuality::Set_Cut_Parameters(std::string Algorithm,float maxZ0, float maxEta, float chi2dofMax,float bendchi2Max, float minPt, int nStubmin) {
 
     Algorithm_ = Algorithm;
     maxZ0_ = maxZ0;
@@ -351,7 +351,7 @@ void L1TrackClassifier::Set_Cut_Parameters(std::string Algorithm,float maxZ0, fl
 
 }
 
-void L1TrackClassifier::Set_ONNX_Model(std::string Algorithm,std::string ONNXInputName,std::vector<std::string> in_features) {
+void L1TrackQuality::Set_ONNX_Model(std::string Algorithm,std::string ONNXInputName,std::vector<std::string> in_features) {
 
     Algorithm_ = Algorithm;
     ONNXInputName_ = ONNXInputName;
@@ -360,4 +360,4 @@ void L1TrackClassifier::Set_ONNX_Model(std::string Algorithm,std::string ONNXInp
 }
 // end producer
 
-DEFINE_FWK_MODULE(L1TrackClassifier);
+DEFINE_FWK_MODULE(L1TrackQuality);

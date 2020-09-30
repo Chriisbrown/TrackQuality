@@ -85,13 +85,13 @@ using namespace edm;
 //                          //
 //////////////////////////////
 
-class L1TrackClassNtupleMaker : public edm::EDAnalyzer
+class L1TrackQualityNtupleMaker : public edm::EDAnalyzer
 {
 public:
 
   // Constructor/destructor
-  explicit L1TrackClassNtupleMaker(const edm::ParameterSet& iConfig);
-  virtual ~L1TrackClassNtupleMaker();
+  explicit L1TrackQualityNtupleMaker(const edm::ParameterSet& iConfig);
+  virtual ~L1TrackQualityNtupleMaker();
 
   // Mandatory methods
   virtual void beginJob();
@@ -283,7 +283,7 @@ private:
 
 //////////////
 // CONSTRUCTOR
-L1TrackClassNtupleMaker::L1TrackClassNtupleMaker(edm::ParameterSet const& iConfig) :
+L1TrackQualityNtupleMaker::L1TrackQualityNtupleMaker(edm::ParameterSet const& iConfig) :
   config(iConfig)
 {
 
@@ -327,25 +327,25 @@ L1TrackClassNtupleMaker::L1TrackClassNtupleMaker(edm::ParameterSet const& iConfi
 
 /////////////
 // DESTRUCTOR
-L1TrackClassNtupleMaker::~L1TrackClassNtupleMaker()
+L1TrackQualityNtupleMaker::~L1TrackQualityNtupleMaker()
 {
 }
 
 //////////
 // END JOB
-void L1TrackClassNtupleMaker::endJob()
+void L1TrackQualityNtupleMaker::endJob()
 {
   // things to be done at the exit of the event Loop
-  cerr << "L1TrackClassNtupleMaker::endJob" << endl;
+  cerr << "L1TrackQualityNtupleMaker::endJob" << endl;
 }
 
 ////////////
 // BEGIN JOB
-void L1TrackClassNtupleMaker::beginJob()
+void L1TrackQualityNtupleMaker::beginJob()
 {
 
   // things to be done before entering the event Loop
-  cerr << "L1TrackClassNtupleMaker::beginJob" << endl;
+  cerr << "L1TrackQualityNtupleMaker::beginJob" << endl;
 
   //-----------------------------------------------------------------------------------------------
   // book histograms / make ntuple
@@ -489,9 +489,8 @@ void L1TrackClassNtupleMaker::beginJob()
     eventTree->Branch("trk_unknown",      &m_trk_unknown);
     eventTree->Branch("trk_combinatoric", &m_trk_combinatoric);
     eventTree->Branch("trk_fake",         &m_trk_fake);
-    if (TrackQuality) {
-      eventTree->Branch("trk_MVA1",         &m_trk_MVA1);
-    }
+    if (TrackQuality) eventTree->Branch("trk_MVA1",         &m_trk_MVA1);
+    
     eventTree->Branch("trk_matchtp_pdgid",&m_trk_matchtp_pdgid);
     eventTree->Branch("trk_matchtp_pt",   &m_trk_matchtp_pt);
     eventTree->Branch("trk_matchtp_eta",  &m_trk_matchtp_eta);
@@ -601,7 +600,7 @@ void L1TrackClassNtupleMaker::beginJob()
 
 //////////
 // ANALYZE
-void L1TrackClassNtupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+void L1TrackQualityNtupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   if (not available_) return; // No ROOT file open.
 
@@ -637,7 +636,7 @@ void L1TrackClassNtupleMaker::analyze(const edm::Event& iEvent, const edm::Event
     m_trk_unknown->clear();
     m_trk_combinatoric->clear();
     m_trk_fake->clear();
-    m_trk_MVA1->clear();
+    if (TrackQuality) m_trk_MVA1->clear();
     m_trk_matchtp_pdgid->clear();
     m_trk_matchtp_pt->clear();
     m_trk_matchtp_eta->clear();
@@ -953,13 +952,14 @@ void L1TrackClassNtupleMaker::analyze(const edm::Event& iEvent, const edm::Event
       cout << endl << "Looking at " << L1Tk_nPar << "-parameter tracks!" << endl;
     }
 
+    if (TrackQuality) {
 
-    if (TrackQuality){
-      std::vector< TTTrack< Ref_Phase2TrackerDigi_ > >::const_iterator iterMVATrack;
-      for ( iterMVATrack = TTTrackMVAHandle->begin(); iterMVATrack != TTTrackMVAHandle->end(); iterMVATrack++ ) {
-        float tmp_trk_MVA1 = iterMVATrack->trkMVA1(); 
-        m_trk_MVA1->push_back(tmp_trk_MVA1);
-     }
+    std::vector< TTTrack< Ref_Phase2TrackerDigi_ > >::const_iterator iterMVATrack;
+    for ( iterMVATrack = TTTrackMVAHandle->begin(); iterMVATrack != TTTrackMVAHandle->end(); iterMVATrack++ ) {
+      float tmp_trk_MVA1 = iterMVATrack->trkMVA1(); 
+      std::cout << tmp_trk_MVA1 << std::endl;
+      m_trk_MVA1->push_back(tmp_trk_MVA1);
+      }
     }
 
     int this_l1track = 0;
@@ -1682,4 +1682,4 @@ void L1TrackClassNtupleMaker::analyze(const edm::Event& iEvent, const edm::Event
 
 ///////////////////////////
 // DEFINE THIS AS A PLUG-IN
-DEFINE_FWK_MODULE(L1TrackClassNtupleMaker);
+DEFINE_FWK_MODULE(L1TrackQualityNtupleMaker);

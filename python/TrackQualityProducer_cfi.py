@@ -1,11 +1,11 @@
 import FWCore.ParameterSet.Config as cms
 
-TrackQualityParams = cms.EDProducer("L1TrackClassifier",
+TrackQualityProducer = cms.EDProducer("L1TrackQuality",
                                   L1TrackInputTag = cms.InputTag("TTTracksFromTrackletEmulation", "Level1TTTracks"), 
                                   Algorithm = cms.string("GBDT"), #None, Cut, NN, GBDT
 
                                   ONNXmodel = cms.FileInPath("L1Trigger/TrackQuality/data/FakeIDGBDT/GBDT_model.onnx"),
-                                  ONNXInputName = cms.string("input_1"),
+                                  ONNXInputName = cms.string("feature_input"),
 
 
 

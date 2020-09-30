@@ -6,7 +6,7 @@ import FWCore.ParameterSet.Config as cms
 import FWCore.Utilities.FileUtils as FileUtils
 import FWCore.ParameterSet.VarParsing as VarParsing
 import os
-process = cms.Process("L1TrackNtuple")
+process = cms.Process("L1TrackQualityNtuple")
 
 ############################################################
 # edit options here
@@ -86,9 +86,8 @@ process.Timing = cms.Service("Timing", summaryOnly = cms.untracked.bool(True))
 ############################################################
 
 # Load Quality params to change algorithm and model location
-process.load("L1Trigger.TrackQuality.TrackQualityParams_cfi")
-#process.TrackQualityParams.Quality_Algorithm = cms.string("GBDT")
-#process.TrackQualityParams.ONNXmodel = cms.FileInPath("../../TrackTrigger/ML_data/FakeIDGBDT/GBDT_model.onnx")
+process.load("L1Trigger.TrackQuality.TrackQualityProducer_cfi")
+
 
 process.load("L1Trigger.TrackFindingTracklet.L1HybridEmulationTracks_cff")
 
@@ -112,7 +111,7 @@ elif (L1TRKALGO == 'HYBRID_DISPLACED'):
 
 elif (L1TRKALGO == 'HYBRID_QUALITY'):
     process.TTTracksEmulation = cms.Path(process.L1HybridTracks)
-    process.TTTracksEmulationWithTruth = cms.Path(process.L1HybridTracksWithAssociators*process.L1TrackQuality)
+    process.TTTracksEmulationWithTruth = cms.Path(process.L1HybridTracksWithAssociators*process.L1TrackQualityProducer)
     NHELIXPAR = 5
     L1TRK_NAME  = "TTTracksFromTrackletEmulation"
     L1TRK_LABEL = "Level1TTTracks"
@@ -162,7 +161,7 @@ else:
 #      all TPs = 1
 ############################################################
 
-process.L1TrackNtuple = cms.EDAnalyzer('L1TrackNtupleMaker',
+process.L1TrackNtuple = cms.EDAnalyzer('L1TrackQualityNtupleMaker',
                                        MyProcess = cms.int32(1),
                                        DebugMode = cms.bool(False),      # printout lots of debug statements
                                        SaveAllTracks = cms.bool(True),   # save *all* L1 tracks, not just truth matched to primary particle
